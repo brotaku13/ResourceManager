@@ -1,7 +1,10 @@
 # Prerequisites
+.d/
 *.d
 
+
 # Compiled Object files
+.o/
 *.slo
 *.lo
 *.o
@@ -30,3 +33,5 @@
 *.exe
 *.out
 *.app
+
+.vscode/
