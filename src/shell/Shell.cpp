@@ -1,101 +1,39 @@
 #include <shell/Shell.h>
 
-Shell::Shell() : currentRequest(0){}
+Shell::Shell(){}
 
-void Shell::reset()
-{
-    if(currentRequest)
-        delete currentRequest;
-}
 
-Request* Shell::getRequest()
+bool Shell::getRequest(vector<string>& command)
 {
-// reads input, validates input, creates new request
-    reset();
-    vector<string> command;
+    // reads input from user into the registers
     readInput(command);
-
-    Request *newRequest = nullptr;
+    bool success = true;
 
     if(command.size() > 0)
     {
-        bool success = true;
+        //top level verification of command
         string& commandType = command[0];
         if(commandType == "cr")
-        {
-            if(this->verifyCreateCommand(command))
-            {
-                this->initCreateRequest(command);
-            }
-            else 
-                success = false;
-        }
+            success = this->verifyCreateCommand(command);
         else if (commandType == "de")
-        {
-            if(this->verifyDestroyCommand(command))
-            {
-                newRequest = this->initDestroyRequest(command);
-            }
-            else
-                success = false;
-            
-        }
+            success = this->verifyDestroyCommand(command);
         else if (commandType == "rq")
-        {
-            if(this->verifyRequestResourceCommand(command))
-            {
-                newRequest = this->initRequestResourceRequest(command);
-            }
-            else
-                success = false;
-        }
+            success = this->verifyRequestResourceCommand(command);
         else if (commandType == "rl")
-        {
-            if(this->verifyReleaseResourceCommand(command))
-            {
-                newRequest = this->initReleaseResourceRequest(command);
-            }
-            else
-             success = false;
-            
-        } 
+            success = this->verifyReleaseResourceCommand(command);
         else if (commandType == "to")
-        {
-            if(this->verifyTimeoutCommand(command))
-            {
-                newRequest = this->initTimeoutRequest();
-            }
-            else
-                success = false;
-        }
+            success = this->verifyTimeoutCommand(command);
         else if (commandType == "in")
-        {
-            if(this->verifyInitCommand(command))
-            {
-                newRequest = this->initInitRequest();
-            }
-            else
-                success = false;
-        } 
-        else 
-        {
+            success = this->verifyInitCommand(command);
+        else
             success = false;
-        }
-        
-        if(!success)
-        {
-            printError();
-        }
     }
     else
     {
-        //we failed to receive a command, error out
-        printError();
+        success = false;
     }
-    
-    currentRequest = newRequest;
-
-    return newRequest;
+        
+    return success;
 }
 
 void Shell::readInput(vector<string>& command)
@@ -122,26 +60,6 @@ bool Shell::verifyInitCommand(const vector<string>& command) const
     return command.size() == 1;
 }
 
-void Shell::printError()
-{
-    cout << "error" << '\n';
-}
-
-Request* Shell::initDestroyRequest(const vector<string>& command) const 
-{
-    return new DestroyRequest(std::stoi(command[1]));
-}
-
-Request*  Shell::initInitRequest() const 
-{
-    return new InitRequest();
-}
-
-Request*  Shell::initTimeoutRequest() const 
-{
-    return new TimeoutRequest();
-}
-
 bool Shell::verifyIntConversion(const vector<string>& command, size_t i, size_t j) const
 {
     if(i > j || j > command.size() - 1)
@@ -161,15 +79,11 @@ bool Shell::verifyIntConversion(const vector<string>& command, size_t i) const
         throw std::exception();
     
     try{
-        int n = std::stoi(command[i]); ++n;
+        std::stoi(command[i]);
     } catch (std::exception) {
         return false;
     }
     return true;
 }
 
-Shell::~Shell()
-{
-    if(currentRequest)
-        delete currentRequest;
-}
+Shell::~Shell(){}

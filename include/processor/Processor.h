@@ -1,0 +1,28 @@
+#ifndef PROCESSOR_H
+#define PROCESSOR_H
+#include <processor/Processor.h>
+#include <shell/BasicShell.h>
+#include <process_manager/BasicProcessManager.h>
+
+#include <memory>
+#include <vector>
+#include <iostream>
+
+class Processor {
+
+public:
+    static const short BASIC = 0;
+    static const short EXTENDED = 1;
+    const short nProcesses = 2;
+    const short nResources = 4;
+    
+    Processor(int managerType);
+    void run();
+    ~Processor();
+
+private:
+    std::unique_ptr<Shell> shell;
+    std::unique_ptr<ProcessManager> processManager;
+};
+
+#endif
