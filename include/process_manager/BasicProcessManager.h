@@ -13,16 +13,19 @@
 class BasicProcessManager : public ProcessManager {
 public:
     BasicProcessManager(short nProcesses, short nResources);
-    void insertIntoReadyList(int newProcessPID);
     void addChildProcess(int parentPID, int childPID);
     void emptyProcessList();
     void deallocateResourceList();
     int insertIntoProcessList(PCB* newPCB);
+    PCB& currentRunningProcess();
+    PCB& getProcess(int index);
 
     bool create(std::vector<std::string>& command);
     bool destroy(std::vector<std::string>& command);
+    int destroyHelper(int pid);
     bool request(std::vector<std::string>& command);
     bool release(std::vector<std::string>& command);
+    bool release(PCB& process, int rid);
     bool timeout();
     bool init();
 

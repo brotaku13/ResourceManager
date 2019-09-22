@@ -7,7 +7,6 @@
 class ProcessManager {
 public:
     ProcessManager(short nProcesses, short nResources);
-    virtual void insertIntoReadyList(int newProcessPID) = 0;
     virtual void addChildProcess(int parentPID, int childPID) = 0;
 
     virtual bool create(std::vector<std::string>& command) = 0;

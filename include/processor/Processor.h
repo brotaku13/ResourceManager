@@ -13,7 +13,7 @@ class Processor {
 public:
     static const short BASIC = 0;
     static const short EXTENDED = 1;
-    const short nProcesses = 2;
+    const short nProcesses = 16;
     const short nResources = 4;
     
     Processor(int managerType);

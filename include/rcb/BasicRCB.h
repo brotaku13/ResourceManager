@@ -10,6 +10,11 @@ public:
 
     BasicRCB();
     void reset();
+    int waitingListSize();
+    void setState(short state);
+    unsigned int  getState();
+    int getNextProcess();
+    void insertProcess(int pid);
     ~BasicRCB();
 
 private:

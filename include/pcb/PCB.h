@@ -2,6 +2,7 @@
 #define PCB_H
 
 #include <list>
+#include <algorithm>
 
 class PCB {
 public:
@@ -11,7 +12,12 @@ public:
     PCB();
     PCB(int state, int parent);
     void reset();
+    bool hasChild(int pid);
+    bool holdingResource(int rid);
+    void releaseResource(int rid);
     void insertChild(int childPID);
+    void setState(short newState);
+    void insertResource(int rid);
 
 protected:
     unsigned int state : 1;

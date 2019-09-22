@@ -16,3 +16,35 @@ void PCB::insertChild(int childPID)
 {
     children.push_back(childPID);
 }
+
+bool PCB::hasChild(int pid)
+{
+    return std::find(children.begin(), children.end(), pid) != children.end();
+}
+
+bool PCB::holdingResource(int rid)
+{
+    return std::find(resources.begin(), resources.end(), rid) != resources.end();
+}
+
+void PCB::releaseResource(int rid)
+{
+    auto it = std::find(resources.begin(), resources.end(), rid);
+    if(it !=  resources.end())
+    {
+        resources.erase(it);
+    }
+}
+
+void PCB::setState(short newState)
+{
+    if(newState != PCB::BlockedState and newState != PCB::ReadyState)
+        throw std::exception();
+    
+    state = newState;
+}
+
+void PCB::insertResource(int rid)
+{
+    resources.push_back(rid);
+}
