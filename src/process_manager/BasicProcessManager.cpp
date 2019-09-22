@@ -57,10 +57,27 @@ bool BasicProcessManager::destroy(std::vector<std::string>& command)
 //recursive function that returns the total number of children processes destroyed
 int BasicProcessManager::destroyHelper(int pid)
 {
-    //for each child in children
-        //destroy child
-            // remove 
-    //destroy parent
+    PCB& proc = getProcess(pid);
+    std::list<int>& procChildren = proc.getChildren();
+    if(procChildren.size() > 0)
+    {
+        auto it = procChildren.begin();
+        auto end = procChildren.end();
+        while(it != end)
+        {
+            destroyHelper(*it);
+            ++it;
+        }
+    }
+    else
+    {
+        int parent = proc.getParent();
+        
+    }
+    
+
+
+
     return pid;
 }
 

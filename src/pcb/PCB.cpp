@@ -44,7 +44,11 @@ void PCB::setState(short newState)
     state = newState;
 }
 
+std::list<int>& PCB::getChildren() { return children; }
+
 void PCB::insertResource(int rid)
 {
     resources.push_back(rid);
 }
+
+int PCB::getParent() {return parent; }

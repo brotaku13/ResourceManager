@@ -18,6 +18,8 @@ public:
     void insertChild(int childPID);
     void setState(short newState);
     void insertResource(int rid);
+    std::list<int>& getChildren();
+    int getParent();
 
 protected:
     unsigned int state : 1;
