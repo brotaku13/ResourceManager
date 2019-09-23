@@ -22,10 +22,9 @@ public:
 
     bool create(std::vector<std::string>& command);
     bool destroy(std::vector<std::string>& command);
-    int destroyHelper(int pid);
+
     bool request(std::vector<std::string>& command);
     bool release(std::vector<std::string>& command);
-    bool release(PCB& process, int rid);
     bool timeout();
     bool init();
 
@@ -34,6 +33,11 @@ private:
     std::vector<PCB*> plist;
     std::vector<BasicRCB> rlist;
     BasicScheduler scheduler;
+
+    int destroyHelper(int pid);
+    bool release(PCB& process, int rid);
+    bool releaseAll(PCB& process);
+    void freePCB(int pid);
 };
 
 #endif

@@ -16,9 +16,11 @@ public:
     bool holdingResource(int rid);
     void releaseResource(int rid);
     void insertChild(int childPID);
+    bool removeChild(int pid);
     void setState(short newState);
     void insertResource(int rid);
     std::list<int>& getChildren();
+    std::list<int>& getResources();
     int getParent();
 
 protected:

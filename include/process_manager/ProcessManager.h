@@ -15,8 +15,11 @@ public:
     virtual bool release(std::vector<std::string>& command) = 0;
     virtual bool timeout() = 0;
     virtual bool init() = 0;
+    virtual void freePCB(int pid) = 0;
 
     bool runCommand(std::vector<std::string>& command);
+    bool validPID(int pid);
+    bool validRID(int rid);
 
     virtual ~ProcessManager();
 

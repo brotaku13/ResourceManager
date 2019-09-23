@@ -7,7 +7,7 @@ int BasicScheduler::getRunningProcess()
     if(readyList.size() > 0)
         return readyList.front();
     else
-        return -1;
+        throw std::exception();
 }
 
 void BasicScheduler::insert(int newProcessPID)

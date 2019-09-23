@@ -22,4 +22,14 @@ bool ProcessManager::runCommand(std::vector<std::string>& command)
         return false;
 }
 
+bool ProcessManager::validPID(int pid)
+{
+    return pid >= 0 && pid < maxProcesses;
+}
+
+bool ProcessManager::validRID(int rid)
+{
+    return rid >= 0 && rid < maxResources;
+}
+
 ProcessManager::~ProcessManager(){}

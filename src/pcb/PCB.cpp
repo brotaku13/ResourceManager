@@ -17,6 +17,20 @@ void PCB::insertChild(int childPID)
     children.push_back(childPID);
 }
 
+bool PCB::removeChild(int pid)
+{
+    auto it = std::find(children.begin(), children.end(), pid);
+    if(it != children.end())
+    {
+        children.erase(it);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool PCB::hasChild(int pid)
 {
     return std::find(children.begin(), children.end(), pid) != children.end();
@@ -44,7 +58,11 @@ void PCB::setState(short newState)
     state = newState;
 }
 
+//insecure as hell. Better would be to provide an iterator implementation
+// but I'm not that much of a tryhard
 std::list<int>& PCB::getChildren() { return children; }
+std::list<int>& PCB::getResources() { return resources; }
+
 
 void PCB::insertResource(int rid)
 {

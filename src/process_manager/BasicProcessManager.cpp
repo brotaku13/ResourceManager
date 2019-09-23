@@ -28,7 +28,7 @@ bool BasicProcessManager::create(std::vector<std::string>& command)
         return false;
     
     int parentProc = scheduler.getRunningProcess();
-    command[0];
+    command[0]; //to keep compiler from complaining about unused variables
     //create the new process
     PCB* newProc = new PCB(PCB::ReadyState, parentProc);
 
@@ -47,39 +47,44 @@ bool BasicProcessManager::create(std::vector<std::string>& command)
 bool BasicProcessManager::destroy(std::vector<std::string>& command)
 {
     int pid = std::stoi(command[1]);
-    if(!plist[scheduler.getRunningProcess()]->hasChild(pid))
+    if(!validPID(pid) || !currentRunningProcess().hasChild(pid))
         return false; //process does not exist in children list
     
+    int nDestoyed = destroyHelper(pid);
 
+    std::cout << nDestoyed << " processes destroyed" << '\n';
     return true;
 }
 
 //recursive function that returns the total number of children processes destroyed
 int BasicProcessManager::destroyHelper(int pid)
 {
+    int nDeleted = 0;
     PCB& proc = getProcess(pid);
-    std::list<int>& procChildren = proc.getChildren();
-    if(procChildren.size() > 0)
+    std::list<int>& children = proc.getChildren();
+    while (children.size() != 0)
     {
-        auto it = procChildren.begin();
-        auto end = procChildren.end();
-        while(it != end)
-        {
-            destroyHelper(*it);
-            ++it;
-        }
+        int n = children.front();
+        children.pop_front();
+        nDeleted += destroyHelper(n);
     }
-    else
-    {
-        int parent = proc.getParent();
-        
-    }
-    
 
+    //remove child process from list of children in parent
+    getProcess(proc.getParent()).removeChild(pid);
 
+    //remove proc from ready list
+    scheduler.remove(pid);
 
-    return pid;
+    //release all resources that proc is holding
+    releaseAll(proc);
+
+    freePCB(pid);
+    --numProcesses;
+
+    return nDeleted + 1;
 }
+
+
 
 bool BasicProcessManager::request(std::vector<std::string>& command)
 {
@@ -89,7 +94,7 @@ bool BasicProcessManager::request(std::vector<std::string>& command)
     PCB& proc = getProcess(pid);
     
     //if the resource doesn't exist or we are already holding the resource
-    if(rid < 0 || rid >= maxResources || pid == 0 || proc.holdingResource(rid))
+    if(!validRID(rid) || pid == 0 || proc.holdingResource(rid))
         return false;
 
     BasicRCB& rcb = rlist[rid];
@@ -120,7 +125,7 @@ bool BasicProcessManager::release(std::vector<std::string>& command)
     //basic error checking
     int rid = std::stoi(command[1]);
     PCB& proc = currentRunningProcess();
-    if(rid < 0 || rid >= maxResources || !proc.holdingResource(rid))
+    if(!validRID(rid) || !proc.holdingResource(rid))
         return false;
 
     if(release(proc, rid))
@@ -156,6 +161,17 @@ bool BasicProcessManager::release(PCB& process, int rid)
     
     return true;
 }
+
+bool BasicProcessManager::releaseAll(PCB& process)
+{
+    std::list<int> resources = process.getResources(); //calls copy constructor
+    for(int i: resources)
+    {
+        release(process, i);
+    }
+    return true;
+}
+
 bool BasicProcessManager::timeout()
 {
     scheduler.contextSwitch();
@@ -164,11 +180,10 @@ bool BasicProcessManager::timeout()
 }
 bool BasicProcessManager::init()
 {
-    std::cout << "Received command in"  << '\n';
     //resets system to default state
     // remove all PCB blocks in plist
     emptyProcessList();
-    ProcessManager::numProcesses = 0;
+    numProcesses = 0;
 
     //remove all items in ready descriptorlist
     scheduler.emptyReadyList();
@@ -183,7 +198,6 @@ bool BasicProcessManager::init()
         int pid = insertIntoProcessList(initProc);
         scheduler.insert(pid);
     } catch (std::exception){
-        std::cerr << "could not insert into process list" << '\n';
         return false;
     }
 
@@ -196,7 +210,6 @@ void BasicProcessManager::emptyProcessList()
     auto end = plist.end();
     while (iter != end)
     {
-        // iter->reset(); //if we use static pcbs
         if(*iter != nullptr)
         {
             delete *iter;
@@ -227,6 +240,15 @@ PCB& BasicProcessManager::getProcess(int index)
 void BasicProcessManager::addChildProcess(int parentPID, int childPID)
 {
     std::cout << parentPID << childPID;
+}
+
+void BasicProcessManager::freePCB(int pid)
+{
+    if(validPID(pid))
+    {
+        delete plist[pid];
+        plist[pid] = nullptr;
+    }
 }
 
 BasicProcessManager::~BasicProcessManager()
