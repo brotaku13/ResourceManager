@@ -13,7 +13,6 @@
 class BasicProcessManager : public ProcessManager {
 public:
     BasicProcessManager(short nProcesses, short nResources);
-    void addChildProcess(int parentPID, int childPID);
     void emptyProcessList();
     void deallocateResourceList();
     int insertIntoProcessList(PCB* newPCB);

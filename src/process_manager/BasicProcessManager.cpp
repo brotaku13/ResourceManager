@@ -234,12 +234,7 @@ PCB& BasicProcessManager::currentRunningProcess()
 
 PCB& BasicProcessManager::getProcess(int index)
 {
-    return *plist[index];
-}
-
-void BasicProcessManager::addChildProcess(int parentPID, int childPID)
-{
-    std::cout << parentPID << childPID;
+    return *(plist[index]);
 }
 
 void BasicProcessManager::freePCB(int pid)

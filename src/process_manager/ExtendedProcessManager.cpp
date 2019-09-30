@@ -43,13 +43,49 @@ bool ExtendedProcessManager::init()
     return true;
 }
 
+int ExtendedProcessManager::insertIntoProcessList(ExtendedPCB* newPCB)
+{
+    auto index = std::find(plist.begin(), plist.end(), nullptr);
+    if(index == plist.end())
+        throw std::exception();
+    
+    *index = newPCB;
+    ++numProcesses;
+    return std::distance(plist.begin(), index);
+}
+
 bool ExtendedProcessManager::create(std::vector<std::string>& command)
 {
+    if(numProcesses >= maxProcesses)
+        return false;
+
+    int priority = std::stoi(command[1]);
+    if(priority != 1 || priority != 2)
+        return false;
+    
+    int parentProc = scheduler.getRunningProcess();
+    ExtendedPCB* newProc = new ExtendedPCB(priority, parentProc);
+
+    //insert into process list
+    int newPid = insertIntoProcessList(newProc);
+
+    // update children of running process
+    plist[parentProc]->insertChild(newPid);
+
+    //place this process on ready list
+    scheduler.insert(newPid, priority);
+
+    //call scheduler()
+    scheduler.printRunningProcess();
+
     return true;
 }
 
 bool ExtendedProcessManager::destroy(std::vector<std::string>& command)
 {
+
+
+    scheduler.printRunningProcess();
     return true;
 }
 
@@ -59,35 +95,31 @@ bool ExtendedProcessManager::request(std::vector<std::string>& command)
 }
 bool ExtendedProcessManager::release(std::vector<std::string>& command)
 {
+
+
+    scheduler.printRunningProcess();
     return true;
 }
 
 bool ExtendedProcessManager::timeout()
 {
+    scheduler.contextSwitch();
+    scheduler.printRunningProcess();
     return true;
 }
 
 void ExtendedProcessManager::freePCB(int pid)
 {
-    
+    if(validPID(pid))
+    {
+        delete plist[pid];
+        plist[pid] = nullptr;
+    }
 }
 
 void ExtendedProcessManager::addChildProcess(int parentPID, int childPID)
 {
 
-}
-
-
-int ExtendedProcessManager::insertIntoProcessList(ExtendedPCB* newPCB)
-{
-    //find first index where the value is nullptr
-
-    auto index = std::find(plist.begin(), plist.end(), nullptr);
-    if(index == plist.end())
-        throw std::exception(); //no more space? should never happen
-    *index = newPCB;
-    ++numProcesses;
-    return std::distance(plist.begin(), index);
 }
 
 void ExtendedProcessManager::deallocateResourceList()
@@ -113,6 +145,16 @@ void ExtendedProcessManager::emptyProcessList()
     }
 }
 
+
+ExtendedPCB& ExtendedProcessManager::currentRunningProcess()
+{
+    return getProcess(scheduler.getRunningProcess());
+}
+
+ExtendedPCB& ExtendedProcessManager::getProcess(int index)
+{
+    return *(plist[index]);
+}
 
 ExtendedProcessManager::~ExtendedProcessManager()
 {

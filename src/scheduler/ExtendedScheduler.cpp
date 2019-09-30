@@ -46,14 +46,10 @@ void ExtendedScheduler::contextSwitch()
 
 void ExtendedScheduler::insert(int newProcessPID, int priority)
 {
-    if(priority < 0 || priority > 2)
-    {
-        throw std::exception();
-    }
-    else
-    {
+    if (priority >= 0 && priority < 3)
         readyList[priority].push_back(newProcessPID);
-    }
+    else
+        throw std::exception();
 }
 
 void ExtendedScheduler::remove(int pid)

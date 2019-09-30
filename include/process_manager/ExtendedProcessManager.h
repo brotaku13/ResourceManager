@@ -17,8 +17,9 @@ public:
     void emptyProcessList();
     void deallocateResourceList();
     int insertIntoProcessList(ExtendedPCB* newPCB);
-    PCB& currentRunningProcess();
-    PCB& getProcess(int index);
+
+    ExtendedPCB& currentRunningProcess();
+    ExtendedPCB& getProcess(int index);
 
     bool create(std::vector<std::string>& command);
     bool destroy(std::vector<std::string>& command);

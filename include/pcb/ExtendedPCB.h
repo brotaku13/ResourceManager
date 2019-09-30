@@ -6,7 +6,8 @@
 class ExtendedPCB : public PCB {
 public:
     ExtendedPCB(int priority);
-    
+    ExtendedPCB(int priority, int parentPID);
+
     ~ExtendedPCB();
 private:
     int priority : 2;
