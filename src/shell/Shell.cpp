@@ -41,8 +41,8 @@ void Shell::readInput(vector<string>& command)
     //read the line
     string line;
     getline(std::cin, line);
-    istringstream iss(line);
-    copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter(command));
+    std::istringstream iss(line);
+    std::copy(std::istream_iterator<string>(iss), std::istream_iterator<string>(), std::back_inserter(command));
 }
 
 bool Shell::verifyTimeoutCommand(const vector<string>& command) const

@@ -1,6 +1,6 @@
 #include <processor/Processor.h>
 
-#define MANAGER_TYPE 0 // == basic, 1 == extended
+#define MANAGER_TYPE 1 // == basic, 1 == extended
 
 int main(){
 

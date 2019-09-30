@@ -24,6 +24,7 @@ public:
     virtual ~ProcessManager();
 
 protected:
+    
     short maxProcesses;
     short maxResources;
     short numProcesses;

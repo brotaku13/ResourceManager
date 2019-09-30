@@ -45,11 +45,11 @@ PRECOMPILE =
 # postcompile step
 POSTCOMPILE = mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
 
-all: basic ext
+all: ext
 
 .PHONY: clean
 clean:
-	$(RM) -r $(OBJDIR) $(DEPDIR)
+	$(RM) -r $(OBJDIR) $(DEPDIR) $(BIN)/*
 
 basic: $(OBJS)
 	$(LINK.o) $^

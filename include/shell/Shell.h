@@ -8,7 +8,8 @@
 #include <string>
 #include <iterator>
 
-using namespace std;
+using std::vector;
+using std::string;
 
 class Shell {
 public:

@@ -4,7 +4,7 @@ BasicScheduler::BasicScheduler(){}
 
 int BasicScheduler::getRunningProcess()
 {
-    if(readyList.size() > 0)
+    if(!readyList.empty())
         return readyList.front();
     else
         throw std::exception();

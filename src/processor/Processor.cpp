@@ -10,8 +10,8 @@ Processor::Processor(int managerType)
     }
     else if (managerType == Processor::EXTENDED)
     {
-        shell = nullptr;
-        processManager = nullptr;
+        shell = std::unique_ptr<ExtendedShell>(new ExtendedShell);
+        processManager = std::unique_ptr<ExtendedProcessManager>(new ExtendedProcessManager(nProcesses, nResources));
     }
 }
 

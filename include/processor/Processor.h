@@ -2,7 +2,9 @@
 #define PROCESSOR_H
 #include <processor/Processor.h>
 #include <shell/BasicShell.h>
+#include <shell/ExtendedShell.h>
 #include <process_manager/BasicProcessManager.h>
+#include <process_manager/ExtendedProcessManager.h>
 
 #include <memory>
 #include <vector>
