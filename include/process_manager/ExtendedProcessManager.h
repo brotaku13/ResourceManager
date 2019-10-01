@@ -13,13 +13,13 @@
 class ExtendedProcessManager : public ProcessManager {
 public:
     ExtendedProcessManager(short nProcesses, short nResources);
-    void addChildProcess(int parentPID, int childPID);
     void emptyProcessList();
     void deallocateResourceList();
     int insertIntoProcessList(ExtendedPCB* newPCB);
 
     ExtendedPCB& currentRunningProcess();
     ExtendedPCB& getProcess(int index);
+    ExtendedRCB& getResource(int rid);
 
     bool create(std::vector<std::string>& command);
     bool destroy(std::vector<std::string>& command);
@@ -35,9 +35,10 @@ private:
     std::vector<ExtendedRCB> rlist;
     ExtendedScheduler scheduler;
 
+    void clearWaitingLists(int pid);
     int destroyHelper(int pid);
-    bool release(PCB& process, int rid);
-    bool releaseAll(PCB& process);
+    void release(ExtendedPCB& proc, int rid, int units);
+    bool releaseAll(ExtendedPCB& process);
     void freePCB(int pid);
     void initRlist();
 };

@@ -6,7 +6,7 @@ ExtendedScheduler::~ExtendedScheduler(){}
 
 int ExtendedScheduler::getRunningProcess()
 {
-    for(int i = numPriorityLevels - 1;  i >= 0; ++i)
+    for(int i = numPriorityLevels - 1;  i >= 0; --i)
     {
         std::list<int>& rl = readyList[i];
         if(!rl.empty())
@@ -22,7 +22,7 @@ void ExtendedScheduler::contextSwitch()
 {
     //equivalent to Timeout()
     std::list<int>* rl = nullptr;
-    for(int i = numPriorityLevels - 1; i >= 0; ++i)
+    for(int i = numPriorityLevels - 1; i >= 0; --i)
     {
         if(!readyList[i].empty())
         {

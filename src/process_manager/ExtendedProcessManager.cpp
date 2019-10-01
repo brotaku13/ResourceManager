@@ -5,7 +5,6 @@ ExtendedProcessManager::ExtendedProcessManager(short nProcesses, short nResource
             plist(nProcesses, nullptr)
 {
     initRlist();
-    init();
 }
 
 void ExtendedProcessManager::initRlist()
@@ -40,6 +39,7 @@ bool ExtendedProcessManager::init()
         return false;
     }
 
+    scheduler.printRunningProcess();
     return true;
 }
 
@@ -60,7 +60,7 @@ bool ExtendedProcessManager::create(std::vector<std::string>& command)
         return false;
 
     int priority = std::stoi(command[1]);
-    if(priority != 1 || priority != 2)
+    if(priority < 1 || priority > 2)
         return false;
     
     int parentProc = scheduler.getRunningProcess();
@@ -83,22 +83,173 @@ bool ExtendedProcessManager::create(std::vector<std::string>& command)
 
 bool ExtendedProcessManager::destroy(std::vector<std::string>& command)
 {
+    int pid = std::stoi(command[1]);
+    if(!validPID(pid) || !currentRunningProcess().hasChild(pid))
+        return false;
 
+    destroyHelper(pid);
 
     scheduler.printRunningProcess();
     return true;
 }
 
+int ExtendedProcessManager::destroyHelper(int pid)
+{
+    int nDeleted = 0;
+    ExtendedPCB& proc = getProcess(pid);
+    std::list<int>& children = proc.getChildren();
+    while(children.size() != 0)
+    {
+        int n = children.front();
+        children.pop_front();
+        nDeleted += destroyHelper(n);
+    }
+
+    //remove child process from list of children in parent
+    getProcess(proc.getParent()).removeChild(pid);
+
+    //remove proc from readyList
+    scheduler.remove(pid);
+
+    //If process is currently waiting for a resource, remove from waiting list
+    clearWaitingLists(pid);
+
+    //release all resources that proc is holding
+    releaseAll(proc);
+
+    freePCB(pid);
+
+    --numProcesses;
+
+    return nDeleted + 1;
+}
+
+bool ExtendedProcessManager::releaseAll(ExtendedPCB& proc)
+{
+    std::list<resourceNode> resources = proc.getResources(); //calls copy constructor
+    for(resourceNode& i: resources)
+    {
+        release(proc, i.rid, i.held);
+    }
+    return true;
+}
+
+/**
+ * Clears a process from any waiting lists it may inhabit
+*/
+void ExtendedProcessManager::clearWaitingLists(int pid)
+{
+    //this is gonna be n^2 but whatever
+    for(ExtendedRCB& rcb : rlist)
+    {
+        rcb.removeProcess(pid);
+    }
+}
+
+//rq r k
+// r = resource id (rid)
+// k = number of that resource requested
 bool ExtendedProcessManager::request(std::vector<std::string>& command)
 {
-    return true;
-}
-bool ExtendedProcessManager::release(std::vector<std::string>& command)
-{
+    int rid = std::stoi(command[1]);
+    int requestedUnits = std::stoi(command[2]);
 
+    int pid = scheduler.getRunningProcess();
+    ExtendedPCB& proc = getProcess(pid);
 
+    //make sure input is valid and the incoming request is not from init
+    if(!validRID(rid) || pid == 0)
+        return false;
+
+    ExtendedRCB& resource = getResource(rid);
+
+    int numUnitsHeld = proc.numUnitsHeld(rid);
+    int maxUnits = resource.getMaxInventory();
+    //check to make sure we aren't over requesting for a given resource
+    if(requestedUnits < 0 || numUnitsHeld + requestedUnits > maxUnits)
+        return false;
+    
+    // now we do the actual code
+    if(resource.getInventory() >= requestedUnits)
+    {
+        //then we can satisfy the request
+        resource.reduceInventory(requestedUnits);
+        proc.insertResource(rid, requestedUnits);
+    }
+    else
+    {
+        //we remove the process from the running list, 
+        // set it as blocked, and add it to the resource waitlist
+
+        proc.setState(PCB::BlockedState);
+
+        //remove from readylist
+        scheduler.remove(pid);
+        
+        //insert in waiting list
+        resource.insertProcess(pid, requestedUnits);
+    }
+    //call scheduler()
     scheduler.printRunningProcess();
     return true;
+}
+
+
+bool ExtendedProcessManager::release(std::vector<std::string>& command)
+{
+    int rid = std::stoi(command[1]);
+    int requestedUnits = std::stoi(command[2]);
+
+    int pid = scheduler.getRunningProcess();
+    ExtendedPCB& proc = getProcess(pid);
+
+    //make sure input is valid and the incoming request is not from init
+    //and that we are holding the resource
+    if(!validRID(rid) || pid == 0 || !proc.holdingResource(rid) || requestedUnits < 0 || requestedUnits > proc.numUnitsHeld(rid))
+        return false;
+
+    release(proc, rid, requestedUnits);
+
+    //run scheduler()
+    scheduler.printRunningProcess();
+    return true;
+}
+
+void ExtendedProcessManager::release(ExtendedPCB& proc, int rid, int units)
+{
+    ExtendedRCB& resource = getResource(rid);
+
+    //remove resources from currently held units on process, 
+    //removing from resources list if necessary
+    proc.releaseResource(rid, units);
+
+    //increase the state of the resource that was released
+    resource.increaseInventory(units);
+
+    //go through and try to service as many waiting processes as possible
+    while(resource.waitingListSize() != 0 && resource.getInventory() > 0)
+    {
+        //grab the next process in line
+        waitlistNode wln = resource.front();
+        int newPid = wln.pid;
+
+        // if we have enough units available, service it
+        if(resource.getInventory() >= wln.unitsRequested)
+        {
+            //reduce the units available
+            resource.reduceInventory(wln.unitsRequested);
+            ExtendedPCB& newProcess = getProcess(newPid);
+            //insert the resource into the list of held resources
+            newProcess.insertResource(rid, wln.unitsRequested);
+            //set the state to ready
+            newProcess.setState(PCB::ReadyState);
+            resource.pop();
+            //place on readylist
+            scheduler.insert(newPid, newProcess.getPriority());
+        }
+        else
+            break;
+    }
 }
 
 bool ExtendedProcessManager::timeout()
@@ -115,11 +266,6 @@ void ExtendedProcessManager::freePCB(int pid)
         delete plist[pid];
         plist[pid] = nullptr;
     }
-}
-
-void ExtendedProcessManager::addChildProcess(int parentPID, int childPID)
-{
-
 }
 
 void ExtendedProcessManager::deallocateResourceList()
@@ -154,6 +300,11 @@ ExtendedPCB& ExtendedProcessManager::currentRunningProcess()
 ExtendedPCB& ExtendedProcessManager::getProcess(int index)
 {
     return *(plist[index]);
+}
+
+ExtendedRCB& ExtendedProcessManager::getResource(int rid)
+{
+    return rlist[rid];
 }
 
 ExtendedProcessManager::~ExtendedProcessManager()

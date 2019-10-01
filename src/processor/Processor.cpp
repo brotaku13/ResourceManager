@@ -19,10 +19,10 @@ void Processor::run()
 {
     vector<string> registers;
     bool success = true;
-    while(success)
+    while(true)
     {
         success = shell->getRequest(registers);
-        if(success)
+        if(success && registers.size() > 0)
         {
             success = processManager->runCommand(registers);
             registers.clear();
@@ -30,7 +30,7 @@ void Processor::run()
 
         if(!success)
         {
-            std::cout << "error" << '\n';
+            std::cout << "-1" << '\n';
         }
     }
 }

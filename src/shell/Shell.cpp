@@ -8,7 +8,6 @@ bool Shell::getRequest(vector<string>& command)
     // reads input from user into the registers
     readInput(command);
     bool success = true;
-
     if(command.size() > 0)
     {
         //top level verification of command
@@ -28,11 +27,6 @@ bool Shell::getRequest(vector<string>& command)
         else
             success = false;
     }
-    else
-    {
-        success = false;
-    }
-        
     return success;
 }
 
@@ -41,6 +35,8 @@ void Shell::readInput(vector<string>& command)
     //read the line
     string line;
     getline(std::cin, line);
+    if(!std::cin)
+        exit(EXIT_SUCCESS);
     std::istringstream iss(line);
     std::copy(std::istream_iterator<string>(iss), std::istream_iterator<string>(), std::back_inserter(command));
 }

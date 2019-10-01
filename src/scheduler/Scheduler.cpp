@@ -5,6 +5,6 @@ Scheduler::Scheduler(){}
 void Scheduler::printRunningProcess()
 {
     int pid = this->getRunningProcess();
-    std::cout << pid << ' ';
+    std::cout << pid << '\n';
 }
 Scheduler::~Scheduler(){}

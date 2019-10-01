@@ -1,6 +1,6 @@
 #include <rcb/BasicRCB.h>
 
-BasicRCB::BasicRCB() : state(1){}
+BasicRCB::BasicRCB() : state(BasicRCB::free){}
 
 void BasicRCB::reset()
 {
